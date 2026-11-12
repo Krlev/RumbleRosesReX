@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Rumble Roses XX Recomp
+Comment=Native Rumble Roses XX recompilation (requires your own game files)
+Exec=rumble_roses_xx
+Icon=rumble-roses-rex
+Terminal=false
+Categories=Game;

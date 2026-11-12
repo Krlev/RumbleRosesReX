@@ -1,0 +1,77 @@
+#!/bin/sh
+set -eu
+
+usage() {
+  cat <<'EOF'
+Usage: RumbleRosesReX.AppImage [--portable] [--game-dir DIR] [-- game options]
+
+  --portable       Keep settings, saves and caches beside the AppImage in
+                   RumbleRosesReX.AppImage.portable (or RRXX_PORTABLE_DIR).
+  --game-dir DIR   Use an extracted game directory containing default.xex.
+  -h, --help       Show this help without starting the game.
+
+RRXX_GAME_DIR can also select your game files. Normal mode stores user data
+in the standard XDG directories. An existing portable directory is detected
+automatically; set RRXX_PORTABLE=0 to opt out. This package has no game files.
+EOF
+}
+
+fail() {
+  printf 'Rumble Roses XX Recomp: %s\n' "$*" >&2
+  if command -v zenity >/dev/null 2>&1; then
+    zenity --error --title='Rumble Roses XX Recomp' --text="$*" 2>/dev/null || :
+  fi
+  exit 1
+}
+
+# Keep the caller's working directory: relative game paths and flags retain
+# their meaning. Mutable paths live outside the read-only AppImage mount.
+appdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+portable=${RRXX_PORTABLE:-auto}
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --portable) portable=1; shift;;
+    --game-dir)
+      [ "$#" -ge 2 ] || fail '--game-dir requires a directory'
+      [ -d "$2" ] || fail "Game directory does not exist: $2"
+      RRXX_GAME_DIR=$(CDPATH= cd -- "$2" && pwd)
+      export RRXX_GAME_DIR
+      shift 2;;
+    -h|--help) usage; exit 0;;
+    --) shift; break;;
+    *) break;;
+  esac
+done
+portable_dir=${RRXX_PORTABLE_DIR:-${APPIMAGE:-$appdir}.portable}
+if [ "$portable" = auto ]; then
+  if [ -n "${RRXX_PORTABLE_DIR:-}" ] || [ -d "$portable_dir" ]; then
+    portable=1
+  else
+    portable=0
+  fi
+fi
+if [ "$portable" = 1 ]; then
+  mkdir -p -- "$portable_dir" || fail "Cannot create portable directory: $portable_dir"
+  portable_dir=$(CDPATH= cd -- "$portable_dir" && pwd)
+  XDG_DATA_HOME=$portable_dir/data
+  XDG_CONFIG_HOME=$portable_dir/config
+  XDG_CACHE_HOME=$portable_dir/cache
+  XDG_STATE_HOME=$portable_dir/state
+  export XDG_DATA_HOME XDG_CONFIG_HOME XDG_CACHE_HOME XDG_STATE_HOME
+fi
+
+# Only validate an explicit selection. With no selection, the native runtime
+# resolves game_data_root from the user's TOML or its normal XDG fallback.
+if [ -n "${RRXX_GAME_DIR:-}" ]; then
+  [ -f "$RRXX_GAME_DIR/default.xex" ] || fail "Game files were not found in:
+$RRXX_GAME_DIR
+
+Use --game-dir /path/to/game with the extracted directory containing default.xex."
+  RRXX_GAME_DIR=$(CDPATH= cd -- "$RRXX_GAME_DIR" && pwd)
+  export RRXX_GAME_DIR
+  # An explicit wrapper selection takes precedence over TOML configuration.
+  # A later native runtime argument can still intentionally override it.
+  set -- "--game_data_root=$RRXX_GAME_DIR" "$@"
+fi
+export LD_LIBRARY_PATH="$appdir/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+exec "$appdir/usr/bin/rumble_roses_xx" "$@"

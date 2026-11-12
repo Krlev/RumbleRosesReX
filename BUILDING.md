@@ -1,5 +1,9 @@
 # Building from source
 
+For a native Linux x86_64 build and portable AppImage, see [LINUX.md](LINUX.md).
+
+## Windows
+
 Windows 10/11 x64. You need your own `default.xex` from your own copy of the game.
 
 Tools: Visual Studio 2022 Build Tools (C++ workload + Windows SDK), LLVM/Clang, CMake, Ninja, Git, .NET 8 SDK (launcher only).

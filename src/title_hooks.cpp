@@ -1131,6 +1131,10 @@ std::unordered_set<int> LoadEvrtIds() {
   if (!root.empty()) {
     candidates.push_back(rex::to_path(root) / "pac" / "evt_eff.pac");
   }
+  const std::string game_root = rex::cvar::GetFlagByName("game_data_root");
+  if (!game_root.empty()) {
+    candidates.push_back(rex::to_path(game_root) / "pac" / "evt_eff.pac");
+  }
   const auto exe_dir = rex::filesystem::GetExecutableFolder();
   for (const auto& assets : {exe_dir / "assets", exe_dir / ".." / ".." / ".." / "assets",
                              exe_dir / ".." / ".." / "assets",

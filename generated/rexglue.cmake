@@ -50,7 +50,7 @@ macro(rexglue_setup_target target_name)
         ${REXGLUE_ENTRYPOINT_INCLUDE_DIR}
     )
     target_link_libraries(${target_name} PRIVATE rex::runtime)
-    rexglue_configure_target(${target_name})
+    rexglue_configure_target(${target_name} ${ARGN})
 endmacro()
 
 # Include DLL module shared library targets if codegen has generated them

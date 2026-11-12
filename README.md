@@ -91,6 +91,9 @@ recompilation project for Rumble Roses XX). It contains the project, the title h
 SDK patch. It does not contain game files, generated recompiled code or build products.
 Build instructions: [BUILDING.md](BUILDING.md).
 
+Experimental native Linux x86_64 build and AppImage packaging instructions:
+[LINUX.md](LINUX.md). Portable mode keeps user files beside the AppImage.
+
 ## Credits
 
 See [CREDITS.md](CREDITS.md). Third-party licences are in [licenses](licenses).
